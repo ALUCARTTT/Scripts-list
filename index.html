@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalador de Scripts Alucart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(-45deg, #6a0dad, #8a2be2, #9370db, #9932cc);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            margin: 20px 0;
+            position: relative;
+        }
+
+        h1, h2 {
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #8a2be2;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #6a0dad;
+            transform: scale(1.05);
+        }
+
+        .welcome-message {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .checklist {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .checklist-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checklist-item label {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .arrow-down {
+            text-align: center;
+            font-size: 2em;
+            margin: 10px 0;
+            animation: bounce 2s infinite;
+            display: none;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        #logoutBtn {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .install-btn {
+            display: none;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            font-size: 1.1em;
+        }
+
+        .install-btn:hover {
+            background-color: #45a049;
+        }
+
+        .script-info {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /* Estilos para as imagens de preview */
+        .preview-image {
+            position: absolute;
+            left: 105%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            height: 150px;
+            border-radius: 8px;
+            border: 2px solid #8a2be2;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 100;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .checklist-item:hover .preview-image {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Instalador de Scripts Alucart</h1>
+        
+        <div id="loginSection">
+            <h2>Login</h2>
+            <form class="login-form" id="loginForm">
+                <input type="text" id="username" placeholder="Nome de usuário" required>
+                <input type="password" id="password" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+        
+        <div class="welcome-message" id="welcomeMessage"></div>
+        
+        <div class="arrow-down" id="arrowDown">↓</div>
+        
+        <div class="checklist" id="checklist">
+            <div class="checklist-item">
+                <input type="checkbox" id="script1" name="script" value="clicker">
+                <label for="script1">Alucart Clicker</label>
+                <div class="preview-image" id="clicker-preview" 
+                     style="background-image: url('https://exemplo.com/caminho/para/alucart-clicker.png')"></div>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="script2" name="script" value="style">
+                <label for="script2">Alucart Style</label>
+                <div class="preview-image" id="style-preview" 
+                     style="background-image: url('https://exemplo.com/caminho/para/alucart-style.png')"></div>
+            </div>
+        </div>
+
+        <button id="installBtn" class="install-btn">Instalar Script Selecionado</button>
+        
+        <div class="script-info" id="scriptInfo">
+            <p>Se o Tampermonkey não abrir automaticamente, <a id="manualInstallLink" href="#" target="_blank">clique aqui para instalar manualmente</a>.</p>
+            <p>Certifique-se de ter o Tampermonkey instalado no seu navegador.</p>
+        </div>
+        
+        <button id="logoutBtn">Sair</button>
+    </div>
+    
+    <footer>
+        Proprietário da página: @Alucart9999 DC
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        // Configuração do Toastr
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        // URLs dos scripts
+        const SCRIPTS = {
+            clicker: "https://firebasestorage.googleapis.com/v0/b/alucartscripts.appspot.com/o/ALUCART%20CLICK%204.1.user.js?alt=media&token=bfca6ee9-15a1-47c2-8271-9ad3198bbb37",
+            style: "https://firebasestorage.googleapis.com/v0/b/alucartscripts.appspot.com/o/Alucart%20styles.user.js?alt=media&token=f26d6d4f-4485-4ebf-b9ab-aa316efe09f5"
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginSection = document.getElementById('loginSection');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const checklist = document.getElementById('checklist');
+            const arrowDown = document.getElementById('arrowDown');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const installBtn = document.getElementById('installBtn');
+            const scriptInfo = document.getElementById('scriptInfo');
+            const manualInstallLink = document.getElementById('manualInstallLink');
+            const scriptCheckboxes = document.querySelectorAll('input[name="script"]');
+            
+            // Credenciais válidas
+            const VALID_USERNAME = "Lucas Jiren";
+            const VALID_PASSWORD = "aPLybbOtYGWAzRF0W3OUOmIUuPIcBwKPgvv8zHoFkJOWzAy7f88Ff0ftpYesJLYM";
+            
+            // Função para mostrar elementos após login
+            function showChecklistInterface(username) {
+                loginSection.style.display = 'none';
+                welcomeMessage.textContent = `Bem-vindo, ${username}!`;
+                welcomeMessage.style.display = 'block';
+                checklist.style.display = 'flex';
+                arrowDown.style.display = 'block';
+                logoutBtn.style.display = 'block';
+            }
+            
+            // Verificar login ao carregar a página
+            function checkExistingLogin() {
+                const savedUsername = localStorage.getItem('username');
+                const savedPassword = localStorage.getItem('password');
+                
+                if (savedUsername && savedPassword) {
+                    if (savedUsername === VALID_USERNAME && savedPassword === VALID_PASSWORD) {
+                        showChecklistInterface(savedUsername);
+                        toastr.success('Login automático realizado!');
+                    } else {
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('password');
+                    }
+                }
+            }
+            
+            // Verificar login existente ao carregar a página
+            checkExistingLogin();
+            
+            // Lidar com o login
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+                
+                if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+                    // Salvar no localStorage
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('password', password);
+                    
+                    // Mostrar interface
+                    showChecklistInterface(username);
+                    
+                    // Notificação de sucesso
+                    toastr.success('Login realizado com sucesso!');
+                } else {
+                    // Notificação de erro
+                    toastr.error('Usuário ou senha incorretos! ');
+                    document.getElementById('username').focus();
+                }
+            });
+            
+            // Lidar com a seleção de scripts
+            scriptCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Garantir que apenas um seja selecionado
+                    if (this.checked) {
+                        scriptCheckboxes.forEach(cb => {
+                            if (cb !== this) cb.checked = false;
+                        });
+                        installBtn.style.display = 'block';
+                        scriptInfo.style.display = 'none';
+                    } else {
+                        installBtn.style.display = 'none';
+                        scriptInfo.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Lidar com a instalação
+            installBtn.addEventListener('click', function() {
+                const selectedScript = document.querySelector('input[name="script"]:checked');
+                
+                if (selectedScript) {
+                    const scriptUrl = SCRIPTS[selectedScript.value];
+                    const scriptName = selectedScript.value === 'clicker' ? 'Alucart Clicker' : 'Alucart Style';
+                    
+                    // Configurar link para instalação manual
+                    manualInstallLink.href = scriptUrl;
+                    
+                    // Abrir o script em uma nova aba para o Tampermonkey detectar
+                    window.open(scriptUrl, '_blank');
+                    
+                    // Mostrar informações adicionais
+                    scriptInfo.style.display = 'block';
+                    
+                    // Rolagem suave para as informações
+                    scriptInfo.scrollIntoView({ behavior: 'smooth' });
+                    
+                    toastr.info(`Abrindo instalador para: ${scriptName}`);
+                }
+            });
+            
+            // Lidar com o logout
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('username');
+                localStorage.removeItem('password');
+                toastr.info('Você saiu do sistema. Redirecionando...');
+                setTimeout(() => location.reload(), 1000);
+            });
+        });
+    </script>
+</body>
+</html>
