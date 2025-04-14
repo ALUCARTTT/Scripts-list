@@ -172,7 +172,6 @@
             text-align: center;
         }
 
-        /* Estilos para as imagens de preview */
         .preview-image {
             position: absolute;
             left: 105%;
@@ -194,7 +193,6 @@
             display: block;
         }
 
-        /* Miniplayer styles */
         .miniplayer {
             position: fixed;
             left: 20px;
@@ -231,6 +229,45 @@
             font-size: 1.2em;
             cursor: pointer;
             padding: 0;
+        }
+
+        .installation-steps {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .step {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background-color: #8a2be2;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .manual-install {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
@@ -269,8 +306,30 @@
         <button id="installBtn" class="install-btn">Instalar Script Selecionado</button>
         
         <div class="script-info" id="scriptInfo">
-            <p>Se o Tampermonkey não abrir automaticamente, <a id="manualInstallLink" href="#" target="_blank">clique aqui para instalar manualmente</a>.</p>
-            <p>Certifique-se de ter o Tampermonkey instalado no seu navegador.</p>
+            <div class="installation-steps" id="installationSteps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">Aguarde a instalação automática iniciar</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">Se nada acontecer em 5 segundos, <a id="manualInstallLink" href="#" target="_blank">clique aqui</a></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">Siga as instruções do Tampermonkey para concluir</div>
+                </div>
+            </div>
+            <div class="manual-install" id="manualInstall">
+                <h3>Instalação Manual:</h3>
+                <ol>
+                    <li>Clique com o botão direito <a id="directDownloadLink" href="#">neste link</a> e selecione "Salvar link como..."</li>
+                    <li>Salve o arquivo com extensão <code>.user.js</code></li>
+                    <li>Abra o Tampermonkey e vá em "Utilitários" (ícone de ferramentas)</li>
+                    <li>Arraste o arquivo salvo para a área de importação</li>
+                    <li>Confirme a instalação quando solicitado</li>
+                </ol>
+            </div>
         </div>
         
         <button id="logoutBtn">Sair</button>
@@ -279,7 +338,7 @@
     <!-- Miniplayer -->
     <div class="miniplayer" id="miniplayer">
         <div class="miniplayer-header">
-            <span>Confira nosso Vídeo</span>
+            <span>Confira nosso Vídeo!</span>
             <button class="close-miniplayer" id="closeMiniplayer">×</button>
         </div>
         <iframe src="https://www.youtube.com/embed/_2ZpWK9o8kQ?si=uH5xz_QxO11q7VuP" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -310,7 +369,7 @@
 
         // URLs dos scripts
         const SCRIPTS = {
-            clicker: "https://firebasestorage.googleapis.com/v0/b/alucartscripts.appspot.com/o/ALUCART%20CLICK%204.1.user.js?alt=media&token=bfca6ee9-15a1-47c2-8271-9ad3198bbb37",
+            clicker: "https://firebasestorage.googleapis.com/v0/b/alucartscripts.appspot.com/o/ALUCART%20CLICKER.user.js?alt=media&token=46ed496b-3194-403e-b1cb-abefa7d090fa",
             style: "https://firebasestorage.googleapis.com/v0/b/alucartscripts.appspot.com/o/Alucart%20styles.user.js?alt=media&token=f26d6d4f-4485-4ebf-b9ab-aa316efe09f5"
         };
 
@@ -324,6 +383,8 @@
             const installBtn = document.getElementById('installBtn');
             const scriptInfo = document.getElementById('scriptInfo');
             const manualInstallLink = document.getElementById('manualInstallLink');
+            const directDownloadLink = document.getElementById('directDownloadLink');
+            const manualInstall = document.getElementById('manualInstall');
             const scriptCheckboxes = document.querySelectorAll('input[name="script"]');
             const miniplayer = document.getElementById('miniplayer');
             const closeMiniplayer = document.getElementById('closeMiniplayer');
@@ -381,7 +442,7 @@
                     toastr.success('Login realizado com sucesso!');
                 } else {
                     // Notificação de erro
-                    toastr.error('Usuário ou senha incorretos! ');
+                    toastr.error('Usuário ou senha incorretos!');
                     document.getElementById('username').focus();
                 }
             });
@@ -396,6 +457,7 @@
                         });
                         installBtn.style.display = 'block';
                         scriptInfo.style.display = 'none';
+                        manualInstall.style.display = 'none';
                     } else {
                         installBtn.style.display = 'none';
                         scriptInfo.style.display = 'none';
@@ -403,27 +465,50 @@
                 });
             });
             
+            // Função para instalar o script
+            function installScript(scriptUrl) {
+                // Mostrar passos de instalação
+                document.getElementById('installationSteps').style.display = 'block';
+                scriptInfo.style.display = 'block';
+                scriptInfo.scrollIntoView({ behavior: 'smooth' });
+                
+                // Configurar links manuais
+                manualInstallLink.href = scriptUrl;
+                directDownloadLink.href = scriptUrl;
+                
+                // Método 1: Tentativa direta com link .user.js
+                const newTab = window.open(scriptUrl, '_blank');
+                
+                // Verificar se a instalação foi interceptada
+                setTimeout(() => {
+                    if (newTab && !newTab.closed) {
+                        newTab.close();
+                        manualInstall.style.display = 'block';
+                        toastr.info('Mostrando instruções para instalação manual...');
+                    }
+                }, 5000);
+                
+                // Método alternativo: Criar link de download
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = scriptUrl;
+                    link.download = scriptUrl.split('/').pop().split('?')[0];
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, 1000);
+            }
+            
             // Lidar com a instalação
             installBtn.addEventListener('click', function() {
                 const selectedScript = document.querySelector('input[name="script"]:checked');
                 
                 if (selectedScript) {
                     const scriptUrl = SCRIPTS[selectedScript.value];
+                    installScript(scriptUrl);
+                    
                     const scriptName = selectedScript.value === 'clicker' ? 'Alucart Clicker' : 'Alucart Style';
-                    
-                    // Configurar link para instalação manual
-                    manualInstallLink.href = scriptUrl;
-                    
-                    // Abrir o script em uma nova aba para o Tampermonkey detectar
-                    window.open(scriptUrl, '_blank');
-                    
-                    // Mostrar informações adicionais
-                    scriptInfo.style.display = 'block';
-                    
-                    // Rolagem suave para as informações
-                    scriptInfo.scrollIntoView({ behavior: 'smooth' });
-                    
-                    toastr.info(`Abrindo instalador para: ${scriptName}`);
+                    toastr.info(`Iniciando instalação do: ${scriptName}`);
                 }
             });
             
